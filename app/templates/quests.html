@@ -1,8 +1,42 @@
-{% extends "base.html" %}{% block content %}
+{% extends "base.html" %}
+{% block title %}Quest Functions{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Quest functions</h4>
+  <a href="{{ url_for('quests_search') }}" class="btn btn-sm btn-outline-light">
+    🔍 Поиск
+  </a>
+</div>
+
 <div class="row">
-<div class="col-4"><ul>
-{% for node in tree %}{% include "partials/quest_node.html" with context %}{% endfor %}
-</ul></div>
-<div class="col-8">{% if content_html %}{{ content_html|safe }}{% else %}<p>Select file</p>{% endif %}</div>
+  <div class="col-md-4 mb-3">
+    <div class="bg-black p-3 rounded" style="max-height: 80vh; overflow: auto;">
+      <h5 class="mb-3">Структура</h5>
+      {% if tree %}
+        <ul class="list-unstyled small">
+          {% for node in tree %}
+            {% include "partials/quest_node.html" %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">Репозиторий с квестами пока недоступен (проверь клонирование в /data).</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-md-8 mb-3">
+    <div class="bg-black p-3 rounded" style="max-height: 80vh; overflow: auto;">
+      {% if content_html %}
+        <div class="small quest-content">
+          {{ content_html | safe }}
+        </div>
+      {% else %}
+        <p class="text-muted">
+          Выбери файл слева, чтобы посмотреть его содержимое.
+        </p>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

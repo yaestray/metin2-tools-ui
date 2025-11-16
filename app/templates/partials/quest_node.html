@@ -1,5 +1,23 @@
-{% if node.type=='dir' %}
-<li><b>{{ node.name }}</b><ul>{% for c in node.children %}{% include "partials/quest_node.html" with node=c %}{% endfor %}</ul></li>
-{% else %}
-<li><a href="{{ url_for('quests_view') }}?path={{ node.path }}">{{ node.name }}</a></li>
-{% endif %}
+{% macro render_node(node) %}
+  {% if node.type == 'dir' %}
+    <li class="mb-1">
+      <div class="fw-semibold">{{ node.name }}</div>
+      {% if node.children %}
+        <ul class="list-unstyled ms-3">
+          {% for child in node.children %}
+            {{ render_node(child) }}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </li>
+  {% elif node.type == 'file' %}
+    <li>
+      <a href="{{ url_for('quests_view') }}?path={{ node.path }}"
+         class="link-light text-decoration-none d-block py-1">
+        {{ node.name }}
+      </a>
+    </li>
+  {% endif %}
+{% endmacro %}
+
+{{ render_node(node) }}

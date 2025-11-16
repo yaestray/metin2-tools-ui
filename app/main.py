@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -32,8 +32,42 @@ async def quests_view(request: Request, path: str):
         {"request": request, "tree": tree, "content_html": html, "current_path": path})
 
 @app.get("/icons", response_class=HTMLResponse)
-async def icons_page(request: Request, folder: str = "", q: str = ""):
+async def icons_page(
+    request: Request,
+    folder: str = "",
+    q: str = "",
+    page: int = Query(1, ge=1),
+):
     all_icons = icons_index.list_icons()
-    filtered = [i for i in all_icons if (not folder or i["folder"].startswith(folder)) and (not q or q.lower() in i["name"].lower())]
-    return templates.TemplateResponse("icons.html",
-        {"request": request, "icons": filtered, "folder": folder, "q": q})
+    filtered = [
+        i for i in all_icons
+        if (not folder or i["folder"].startswith(folder))
+        and (not q or q.lower() in i["name"].lower())
+    ]
+    pagination = icons_index.paginated_icons(filtered, page=page, page_size=60)
+    return templates.TemplateResponse(
+        "icons.html",
+        {
+            "request": request,
+            "icons": pagination["items"],
+            "folder": folder,
+            "q": q,
+            "page": pagination["page"],
+            "pages": pagination["pages"],
+            "total": pagination["total"],
+        },
+    )
+
+@app.get("/quests/search", response_class=HTMLResponse)
+async def quests_search(request: Request, q: str = Query("", description="Query")):
+    tree = quest_index.build_tree()
+    results = quest_index.search(q) if q else []
+    return templates.TemplateResponse(
+        "quests_search.html",
+        {
+            "request": request,
+            "tree": tree,
+            "query": q,
+            "results": results,
+        },
+    )

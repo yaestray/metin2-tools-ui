@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск по квестам — Metin2 Tools{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-4 mb-3">
+    <form method="get" action="{{ url_for('quests_search') }}">
+      <div class="input-group">
+        <input type="text"
+               class="form-control"
+               name="q"
+               placeholder="Введите часть имени или текста..."
+               value="{{ query or '' }}">
+        <button class="btn btn-outline-light" type="submit">Найти</button>
+      </div>
+    </form>
+
+    <hr>
+    <h6 class="mb-2">Дерево квестов</h6>
+    <div class="quest-tree">
+        <ul class="list-unstyled small">
+            {% for node in tree %}
+            {% include "partials/quest_node.html" %}
+            {% endfor %}
+        </ul>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <h5>Результаты поиска{% if query %} по запросу «{{ query }}»{% endif %}</h5>
+    {% if not query %}
+      <p class="text-muted">Введите запрос и нажмите «Найти».</p>
+    {% elif not results %}
+      <p class="text-warning">Ничего не найдено.</p>
+    {% else %}
+      <p class="text-muted small">Найдено: {{ results|length }}</p>
+      <ul class="list-group">
+        {% for r in results %}
+          <li class="list-group-item bg-dark text-light">
+            <a class="link-light" href="{{ url_for('quests_view') }}?path={{ r.path }}">
+              <strong>{{ r.name }}</strong>
+            </a>
+            <div class="small text-muted">
+              <code>{{ r.path }}</code>
+            </div>
+            {% if r.snippet %}
+              <div class="small mt-1">
+                …{{ r.snippet|replace(query, '<mark>' ~ query ~ '</mark>')|safe }}…
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
