@@ -3,98 +3,137 @@
 {% block title %}Metin2 Tools{% endblock %}
 
 {% block content %}
-<div class="py-4">
-  <div class="row mb-4">
-    <div class="col-md-7">
-      <h2 class="mb-3">Metin2 Tools</h2>
-      <p class="text-muted">
-        Личный набор инструментов для работы с приватным сервером Metin2:
-        удобный браузер документации по quest-функциям и просмотрщик иконок клиента.
+<div class="page-hero py-4">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7">
+      <h1 class="display-5 mb-3">Metin2 Tools</h1>
+      <p class="lead text-muted mb-3">
+        Небольшой, но полезный набор инструментов вокруг приватного сервера Metin2:
+        документация по quest&nbsp;/ Lua-функциям и браузер иконок клиента.
       </p>
-      <div class="d-flex flex-wrap gap-2 mt-3">
-        <a href="{{ url_for('quests_page') }}" class="btn btn-outline-light">
-          📜 Открыть Quest functions
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <a href="{{ url_for('quests_page') }}" class="btn btn-outline-light btn-lg">
+          📜 Открыть Quest&nbsp;functions
         </a>
-        <a href="{{ url_for('icons_page') }}" class="btn btn-outline-light">
+        <a href="{{ url_for('icons_page') }}" class="btn btn-outline-light btn-lg">
           🎨 Просмотр иконок
         </a>
       </div>
+      <p class="small text-muted mb-0">
+        Проект сделан «для себя и потомков» — чтобы не терять знания и артефакты,
+        накопленные за годы работы с Metin2.
+      </p>
     </div>
-    <div class="col-md-5">
-      <div class="bg-black rounded p-3 h-100">
-        <h6 class="text-muted text-uppercase small mb-2">Репозитории</h6>
-        <ul class="list-unstyled small mb-0">
-          <li class="mb-1">
-            <a class="link-light" href="https://github.com/yaestray/metin2-quest-functions" target="_blank">
-              metin2-quest-functions
-            </a>
-            <div class="text-muted">Документация по Lua/quest-функциям</div>
-          </li>
-          <li class="mb-1">
-            <a class="link-light" href="https://github.com/yaestray/metin2-icons" target="_blank">
-              metin2-icons
-            </a>
-            <div class="text-muted">Набор иконок клиента</div>
-          </li>
-          <li class="mb-1">
-            <a class="link-light" href="https://github.com/yaestray/metin2-tools-ui" target="_blank">
-              metin2-tools-ui
-            </a>
-            <div class="text-muted">Этот интерфейс (FastAPI + K8s)</div>
-          </li>
-        </ul>
+
+    <div class="col-lg-5">
+      <div class="card bg-black border-secondary h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase small mb-2">О проекте</h6>
+          <ul class="list-unstyled small mb-3">
+            <li class="mb-1">• Документация по quest&nbsp;/ Lua-функциям с живой навигацией.</li>
+            <li class="mb-1">• Каталог иконок клиента с фильтрацией по категориям и ID.</li>
+            <li class="mb-1">• Возможность скачать иконку в формате <code>PNG</code> или <code>TGA</code>.</li>
+            <li class="mb-1">• Разворачивается в Kubernetes как отдельный сервис.</li>
+          </ul>
+
+          <h6 class="text-muted text-uppercase small mb-2">Репозитории</h6>
+          <ul class="list-unstyled small mb-0">
+            <li class="mb-1">
+              <a class="link-light" href="https://github.com/yaestray/metin2-quest-functions" target="_blank">
+                metin2-quest-functions
+              </a>
+              <div class="text-muted">Документация по Lua/quest-функциям</div>
+            </li>
+            <li class="mb-1">
+              <a class="link-light" href="https://github.com/yaestray/metin2-icons" target="_blank">
+                metin2-icons
+              </a>
+              <div class="text-muted">Набор иконок клиента</div>
+            </li>
+            <li>
+              <a class="link-light" href="https://github.com/yaestray/metin2-tools-ui" target="_blank">
+                metin2-tools-ui
+              </a>
+              <div class="text-muted">Этот интерфейс (FastAPI&nbsp;+&nbsp;K8s)</div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="row g-3">
-    <div class="col-md-4">
-      <div class="bg-black rounded p-3 h-100">
-        <h5 class="mb-2">📜 Quest functions</h5>
-        <p class="small text-muted mb-2">
-          Быстрый доступ к структуре документации по квестам и Lua-функциям.
-        </p>
-        <ul class="small text-muted mb-3">
-          <li>Дерево разделов слева</li>
-          <li>Markdown-рендер справа</li>
-          <li>Поиск по имени и содержимому</li>
-        </ul>
-        <a href="{{ url_for('quests_page') }}" class="btn btn-sm btn-outline-light">
-          Перейти к квестам →
-        </a>
-      </div>
-    </div>
+<hr class="border-secondary my-4">
 
-    <div class="col-md-4">
-      <div class="bg-black rounded p-3 h-100">
-        <h5 class="mb-2">🎨 Иконки клиента</h5>
-        <p class="small text-muted mb-2">
-          Браузер иконок Metin2 с фильтрацией по имени и папке.
-        </p>
-        <ul class="small text-muted mb-3">
-          <li>Фильтр по имени и папке</li>
-          <li>Пагинация</li>
-          <li>Pixel-perfect превью 32×32</li>
-        </ul>
-        <a href="{{ url_for('icons_page') }}" class="btn btn-sm btn-outline-light">
-          Перейти к иконкам →
-        </a>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="feature-card bg-black rounded p-3 h-100">
+      <div class="d-flex align-items-center mb-2">
+        <span class="me-2">📜</span>
+        <h5 class="mb-0">Quest functions</h5>
       </div>
+      <p class="small text-muted mb-2">
+        Быстрый доступ к структуре документации по квестам и Lua-функциям.
+      </p>
+      <ul class="small text-muted mb-3">
+        <li>Дерево разделов слева.</li>
+        <li>Markdown-рендер справа.</li>
+        <li>Поиск по имени и содержимому.</li>
+      </ul>
+      <a href="{{ url_for('quests_page') }}" class="btn btn-sm btn-outline-light">
+        Перейти к квестам →
+      </a>
     </div>
+  </div>
 
-    <div class="col-md-4">
-      <div class="bg-black rounded p-3 h-100">
-        <h5 class="mb-2">⚙️ Для будущего</h5>
-        <p class="small text-muted mb-2">
-          Это место можно расширять: добавлять тулзы для клиента, патчер, чек-листы релизов и т.п.
-        </p>
-        <ul class="small text-muted mb-0">
-          <li>Поиск по коду квестов</li>
-          <li>Генератор шаблонов Lua</li>
-          <li>Ссылки на приватную документацию</li>
-        </ul>
+  <div class="col-md-4">
+    <div class="feature-card bg-black rounded p-3 h-100">
+      <div class="d-flex align-items-center mb-2">
+        <span class="me-2">🎨</span>
+        <h5 class="mb-0">Иконки клиента</h5>
       </div>
+      <p class="small text-muted mb-2">
+        Браузер иконок клиента Metin2 с фильтрацией по категориям и ID.
+      </p>
+      <ul class="small text-muted mb-3">
+        <li>Категории из <code>manifest.json</code>.</li>
+        <li>Пагинация и поиск по названию.</li>
+        <li>Скачивание в форматах PNG и TGA.</li>
+      </ul>
+      <a href="{{ url_for('icons_page') }}" class="btn btn-sm btn-outline-light">
+        Перейти к иконкам →
+      </a>
     </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="feature-card bg-black rounded p-3 h-100">
+      <div class="d-flex align-items-center mb-2">
+        <span class="me-2">⚙️</span>
+        <h5 class="mb-0">Дальнейшее развитие</h5>
+      </div>
+      <p class="small text-muted mb-2">
+        Проект задуман как база инструментов вокруг Metin2 — для себя и будущих разработчиков.
+      </p>
+      <ul class="small text-muted mb-3">
+        <li>Поиск по коду квестов.</li>
+        <li>Генератор шаблонов Lua и триггеров.</li>
+        <li>Расширяемые утилиты для клиента и патчера.</li>
+      </ul>
+      <span class="badge bg-dark border text-muted small">
+        Roadmap живёт в голове автора 🙂
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4 mb-2 small text-muted d-flex flex-column flex-md-row justify-content-between gap-2">
+  <div>
+    Автор: <span class="text-light">yaestray</span> ·
+    Связаться: <a href="https://estray.t.me" class="link-light" target="_blank">@estray</a>
+  </div>
+  <div>
+    Разворачивается как отдельный сервис в Kubernetes · FastAPI · Python 3
   </div>
 </div>
 {% endblock %}
