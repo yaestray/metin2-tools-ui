@@ -1,7 +1,6 @@
 <li class="quest-node
            {% if node.children %}has-children{% endif %}
-           {% if node.current %}is-active{% endif %}"
-    data-depth="{{ depth }}">
+           {% if node.current %}is-active{% endif %}">
   <div class="quest-node-line d-flex align-items-start">
     {% if node.children %}
       <button type="button"
@@ -13,7 +12,7 @@
       <span class="quest-toggle-spacer me-1"></span>
     {% endif %}
 
-    {# Ссылка на файл/раздел — используй тот параметр, который у тебя есть #}
+    {# Ссылка на файл/раздел — подставь то поле, которое реально есть в node #}
     <a href="/quests?path={{ node.path | urlencode }}"
        class="quest-node-link {% if node.current %}active{% endif %}">
       {{ node.name }}
@@ -21,10 +20,10 @@
   </div>
 
   {% if node.children %}
-    <ul class="list-unstyled ms-3 quest-children
-               {% if depth >= 1 and not node.current %}collapsed{% endif %}">
+    <ul class="list-unstyled ms-3 quest-children collapsed">
       {% for c in node.children %}
-        {% include "partials/quest_node.html" with node=c, depth=depth+1 %}
+        {% set node = c %}
+        {% include "partials/quest_node.html" %}
       {% endfor %}
     </ul>
   {% endif %}

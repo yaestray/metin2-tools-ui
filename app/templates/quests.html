@@ -16,10 +16,11 @@
           <div class="quests-tree">
             <ul class="list-unstyled mb-0">
                 {% for node in tree %}
-                {% include "partials/quest_node.html" with node=node, depth=0 %}
+                {% set _ = namespace(node=node) %} {# заглушка, чтобы явно было видно, что мы вносим node в контекст #}
+                {% include "partials/quest_node.html" %}
                 {% endfor %}
             </ul>
-        </div>
+            </div>
         </div>
       </div>
     </div>
@@ -63,7 +64,6 @@
     </div>
   </div>
 </div>
-{% endblock %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -91,3 +91,4 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+{% endblock %}
