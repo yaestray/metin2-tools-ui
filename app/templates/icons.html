@@ -32,20 +32,49 @@
 {% else %}
   <div class="row row-cols-3 row-cols-sm-4 row-cols-md-6 row-cols-lg-8 g-3">
     {% for icon in icons %}
-      <div class="col text-center">
+        <div class="col text-center">
         <div class="card bg-black border-secondary h-100">
-          <div class="card-body p-2">
-            <img src="{{ url_for('icons', path=icon.path) }}"
-                alt="{{ icon.name }}"
-                class="icon-thumb">
-          </div>
-          <div class="card-footer p-1 small text-truncate">
-            {{ icon.name }}
-          </div>
+            <div class="card-body p-2 d-flex flex-column align-items-center justify-content-center">
+            {% if icon.png_path %}
+                <img src="{{ url_for('icon_file', path=icon.png_path) }}"
+                    alt="{{ icon.name }}"
+                    class="icon-thumb mb-2">
+            {% else %}
+                <div class="icon-thumb placeholder mb-2 d-flex align-items-center justify-content-center">
+                ?
+                </div>
+            {% endif %}
+            <div class="small text-truncate w-100" title="{{ icon.name }}">
+                {{ icon.name }}
+            </div>
+            {% if icon.folder %}
+                <div class="small text-muted text-truncate w-100">
+                <code>{{ icon.folder }}</code>
+                </div>
+            {% endif %}
+            </div>
+            <div class="card-footer p-1">
+            <div class="btn-group btn-group-sm w-100" role="group">
+                {% if icon.png_path %}
+                <a href="{{ url_for('icon_file', path=icon.png_path) }}"
+                    class="btn btn-outline-light"
+                    download>
+                    PNG
+                </a>
+                {% endif %}
+                {% if icon.tga_path %}
+                <a href="{{ url_for('icon_file', path=icon.tga_path) }}"
+                    class="btn btn-outline-light"
+                    download>
+                    TGA
+                </a>
+                {% endif %}
+            </div>
+            </div>
         </div>
-      </div>
+        </div>
     {% endfor %}
-  </div>
+    </div>
 
   {% if pages > 1 %}
     <nav class="mt-3">

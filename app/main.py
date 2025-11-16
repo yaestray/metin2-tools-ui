@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
 
 from .services import quest_index, icons_index
 from .config import ICONS_REPO_PATH
@@ -41,7 +42,7 @@ async def icons_page(
     all_icons = icons_index.list_icons()
     filtered = [
         i for i in all_icons
-        if (not folder or i["folder"].startswith(folder))
+        if (not folder or (i["folder"] and i["folder"].startswith(folder)))
         and (not q or q.lower() in i["name"].lower())
     ]
     pagination = icons_index.paginated_icons(filtered, page=page, page_size=60)
@@ -57,6 +58,23 @@ async def icons_page(
             "total": pagination["total"],
         },
     )
+
+@app.get("/icons/file")
+async def icon_file(path: str):
+    fp = ICONS_REPO_PATH / path
+    if not fp.is_file():
+        raise HTTPException(status_code=404, detail="Icon not found")
+
+    ext = fp.suffix.lower()
+    if ext == ".png":
+        media_type = "image/png"
+    elif ext == ".tga":
+        # браузеры tga не умеют, но для скачивания норм
+        media_type = "application/octet-stream"
+    else:
+        media_type = "application/octet-stream"
+
+    return FileResponse(fp, media_type=media_type, filename=fp.name)
 
 @app.get("/quests/search", response_class=HTMLResponse)
 async def quests_search(request: Request, q: str = Query("", description="Query")):
