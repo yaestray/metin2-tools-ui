@@ -1,22 +1,25 @@
 from pathlib import Path
 from collections import defaultdict
-import json
 from typing import List, Dict, Any, Optional
+import json
 
 from ..config import ICONS_REPO_PATH
 
 
-def _load_manifest() -> List[Dict[str, Any]]:
-    """
-    Читает manifest.json из репозитория иконок и приводит к
-    нормализованному виду:
-    [
-      {"id": "...", "title": "...", "prefix": "..."},
-      ...
-    ]
+def _human_title(name) -> str:
+    if isinstance(name, dict):
+        if "ru" in name and isinstance(name["ru"], str):
+            return name["ru"]
+        for v in name.values():
+            if isinstance(v, str):
+                return v
+        return str(name)
+    if name is None:
+        return ""
+    return str(name)
 
-    Код максимально терпимый к разным схемам manifest.json.
-    """
+
+def _load_manifest() -> List[Dict[str, Any]]:
     manifest_path = ICONS_REPO_PATH / "manifest.json"
     if not manifest_path.is_file():
         return []
@@ -26,63 +29,84 @@ def _load_manifest() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-    # если это словарь с ключами "folders" или "groups"
+    groups = []
+
     if isinstance(raw, dict):
-        if "folders" in raw and isinstance(raw["folders"], list):
-            items = raw["folders"]
-        elif "groups" in raw and isinstance(raw["groups"], list):
-            items = raw["groups"]
+        if isinstance(raw.get("groups"), list):
+            groups = raw["groups"]
+        elif isinstance(raw.get("folders"), list):
+            groups = raw["folders"]
         else:
-            # Может быть мапа id -> объект
-            items = []
+            tmp = []
             for k, v in raw.items():
                 if isinstance(v, dict):
-                    v = dict(v)
-                    v.setdefault("id", k)
-                    items.append(v)
+                    g = dict(v)
+                    g.setdefault("id", k)
+                    tmp.append(g)
+            groups = tmp
+
     elif isinstance(raw, list):
-        items = raw
+        groups = raw
+
     else:
         return []
 
-    folders: List[Dict[str, Any]] = []
-    for itm in items:
-        if not isinstance(itm, dict):
+    result = []
+    for g in groups:
+        if not isinstance(g, dict):
             continue
 
-        # пробуем вытащить базовые поля из разных вариантов
-        prefix = (
-            itm.get("path")
-            or itm.get("folder")
-            or itm.get("prefix")
-            or itm.get("dir")
-            or itm.get("name")
+        gid = g.get("id") or g.get("key") or g.get("slug") or g.get("name")
+        if isinstance(gid, dict):
+            gid = next(iter(gid.values()), None)
+        if not gid:
+            continue
+
+        title = _human_title(
+            g.get("title") or g.get("label") or g.get("name") or gid
         )
-        if not prefix:
-            continue
 
-        fid = itm.get("id") or prefix
-        title = itm.get("title") or itm.get("name") or itm.get("label") or fid
+        prefix = (
+            g.get("prefix") or g.get("path") or g.get("folder")
+            or g.get("dir") or ""
+        )
+        if prefix is None:
+            prefix = ""
+        prefix = str(prefix)
 
-        folders.append(
+        raw_items = (
+            g.get("items") or g.get("icons") or g.get("list")
+            or g.get("names") or []
+        )
+        items = []
+        if isinstance(raw_items, list):
+            for it in raw_items:
+                if isinstance(it, dict):
+                    nm = it.get("name") or it.get("id") or it.get("icon")
+                    if nm:
+                        items.append(str(nm))
+                elif isinstance(it, str):
+                    items.append(it)
+
+        result.append(
             {
-                "id": str(fid),
-                "title": str(title),
-                "prefix": str(prefix),
+                "id": str(gid),
+                "title": title,
+                "prefix": prefix,
+                "items": items,
             }
         )
 
-    # убираем дубли по id, сортируем по title
     seen = set()
-    norm: List[Dict[str, Any]] = []
-    for f in folders:
-        if f["id"] in seen:
+    uniq = []
+    for g in result:
+        if g["id"] in seen:
             continue
-        seen.add(f["id"])
-        norm.append(f)
+        seen.add(g["id"])
+        uniq.append(g)
 
-    norm.sort(key=lambda x: x["title"].lower())
-    return norm
+    uniq.sort(key=lambda x: x["title"].lower())
+    return uniq
 
 
 _manifest_folders_cache: Optional[List[Dict[str, Any]]] = None
@@ -96,9 +120,6 @@ def get_manifest_folders() -> List[Dict[str, Any]]:
 
 
 def list_icons():
-    """
-    Собираем иконки, объединяя PNG/TGA по имени.
-    """
     if not ICONS_REPO_PATH.exists():
         return []
 
@@ -132,10 +153,8 @@ def list_icons():
     return icons
 
 
-def paginated_icons(all_icons, page: int = 1, page_size: int = 60):
+def paginated_icons(all_icons, page: int, page_size: int = 60):
     total = len(all_icons)
-    if page < 1:
-        page = 1
     start = (page - 1) * page_size
     end = start + page_size
     return {
@@ -143,5 +162,5 @@ def paginated_icons(all_icons, page: int = 1, page_size: int = 60):
         "page": page,
         "page_size": page_size,
         "total": total,
-        "pages": (total + page_size - 1) // page_size if total else 1,
+        "pages": max(1, (total + page_size - 1) // page_size),
     }

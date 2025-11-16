@@ -41,31 +41,33 @@ async def icons_page(
     all_icons = icons_index.list_icons()
     manifest_folders = icons_index.get_manifest_folders()
 
-    # ищем выбранную "папку" в manifest.json
     selected_folder = None
+    items_set = set()
     folder_prefix = ""
+
     if folder:
         for f in manifest_folders:
             if f["id"] == folder:
                 selected_folder = f
                 folder_prefix = f.get("prefix") or ""
+                items_set = {str(x) for x in (f.get("items") or [])}
                 break
 
-    def match_folder(icon: dict) -> bool:
-        # если фильтр не выбран — показываем все
+    def match_folder(icon):
+        name = icon["name"]
+
         if not folder:
             return True
 
-        name = icon.get("name", "")
-        real_folder = icon.get("folder", "")
+        # 1) если manifest перечисляет конкретные имена иконок
+        if items_set:
+            return name in items_set
 
-        # 1) если в manifest есть prefix — пробуем по нему
+        # 2) если есть префикс
         if folder_prefix:
-            if name.startswith(folder_prefix) or real_folder.startswith(folder_prefix):
-                return True
+            return name.startswith(folder_prefix)
 
-        # 2) fallback: считаем, что id (food, greatswords и т.п.) —
-        #    логический префикс имени иконки
+        # 3) fallback: id группы как кусок имени
         if name.startswith(folder + "_"):
             return True
         if ("_" + folder + "_") in name:
@@ -76,12 +78,13 @@ async def icons_page(
         return False
 
     filtered = [
-        i
-        for i in all_icons
-        if match_folder(i) and (not q or q.lower() in i["name"].lower())
+        i for i in all_icons
+        if match_folder(i)
+        and (not q or q.lower() in i["name"].lower())
     ]
 
-    pagination = icons_index.paginated_icons(filtered, page=page, page_size=60)
+    pagination = icons_index.paginated_icons(filtered, page)
+
     return templates.TemplateResponse(
         "icons.html",
         {
