@@ -38,7 +38,7 @@
       <ul class="list-group">
         {% for r in results %}
           <li class="list-group-item bg-dark text-light">
-            <a class="link-light" href="{{ url_for('quests_view') }}?path={{ r.path }}">
+            <a class="link-light" href="{{ url_for('quests_page') }}?path={{ r.path }}">
               <strong>{{ r.name }}</strong>
             </a>
             <div class="small text-muted">

@@ -194,7 +194,7 @@ body {
 
 /* Левая колонка со структурой: ограничиваем высоту и даём скролл */
 .quests-sidebar {
-  max-height: calc(100vh - 180px);
+  height: calc(100vh - 140px); /* фиксированная высота под окно */
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -224,24 +224,15 @@ body {
 
 /* Контент квеста справа */
 .quests-markdown {
-  line-height: 1.6;
-  font-size: 0.95rem;
+  background-color: #050505;
+  color: #f7f7f7;          /* <-- чтобы текст был реально светлым */
 }
 
 .quests-markdown h1,
 .quests-markdown h2,
 .quests-markdown h3 {
-  margin-top: 1.4rem;
-  margin-bottom: 0.6rem;
-}
-
-.quests-markdown p {
-  margin-bottom: 0.5rem;
-}
-
-/* Чуть притемнить фон правой карточки, чтобы текст лучше читался */
-.quests-markdown {
-  background-color: #050505;
+  color: #ffffff;          /* яркие заголовки */
+  font-weight: 600;
 }
 
 /* Ссылки в дереве, если длинные — обрезать с многоточием */
