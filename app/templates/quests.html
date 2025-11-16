@@ -1,47 +1,65 @@
 {% extends "base.html" %}
-{% block title %}Quest functions{% endblock %}
+
+{% block title %}Quest functions · Metin2 Tools{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0">Quest functions</h4>
-  <a href="{{ url_for('quests_search') }}" class="btn btn-sm btn-outline-light">
-    🔍 Поиск
-  </a>
-</div>
+<div class="quests-page py-3">
+  <div class="row g-3">
+    <!-- Левая колонка: структура -->
+    <div class="col-lg-3">
+      <div class="card bg-black border-secondary quests-sidebar">
+        <div class="card-body p-2">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="text-uppercase text-muted small mb-0">Структура</h6>
+          </div>
 
-<div class="row">
-  <div class="col-md-4 mb-3">
-    <div class="bg-black p-3 rounded" style="max-height: 80vh; overflow: auto;">
-      <h5 class="mb-3">Структура</h5>
-      {% if tree %}
-        <ul class="list-unstyled small">
-          {% for node in tree %}
-            {% include "partials/quest_node.html" %}
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-muted">Репозиторий с квестами пока недоступен.</p>
-      {% endif %}
+          <div class="quests-tree">
+            <ul class="list-unstyled mb-0">
+              {% for node in tree %}
+                {% include "partials/quest_node.html" with context %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="col-md-8 mb-3">
-    <div class="bg-black p-3 rounded" style="max-height: 80vh; overflow: auto;">
-      {% if current_path %}
-        <div class="small text-muted mb-2">
-          Путь: <code>{{ current_path }}</code>
-        </div>
-      {% endif %}
+    <!-- Правая колонка: контент -->
+    <div class="col-lg-9">
+      <div class="card bg-black border-secondary quests-content">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+            <div>
+              <div class="text-uppercase text-muted small mb-1">Quest functions</div>
+              <h2 class="h4 mb-0">
+                {{ title or 'Документация по квестам и Lua-функциям' }}
+              </h2>
+              {% if path %}
+                <div class="small text-muted mt-1">
+                  Путь: <code>{{ path }}</code>
+                </div>
+              {% endif %}
+            </div>
 
-      {% if content_html %}
-        <div class="small quest-content">
-          {{ content_html | safe }}
+            <!-- Поиск -->
+            <form class="quests-search input-group input-group-sm" method="get" action="{{ url_for('quests_page') }}">
+              <input type="text"
+                     class="form-control"
+                     name="q"
+                     placeholder="Поиск по названию и содержимому…"
+                     value="{{ q or '' }}">
+              <button class="btn btn-outline-light" type="submit">Найти</button>
+            </form>
+          </div>
+
+          <hr class="border-secondary mb-3">
+
+          <!-- Markdown-контент -->
+          <div class="markdown-body quests-markdown">
+            {{ html|safe }}
+          </div>
         </div>
-      {% else %}
-        <p class="text-muted">
-          Выбери файл слева, чтобы посмотреть его содержимое.
-        </p>
-      {% endif %}
+      </div>
     </div>
   </div>
 </div>

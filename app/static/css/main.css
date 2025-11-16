@@ -128,3 +128,70 @@ body {
     font-size: 1.9rem;
   }
 }
+
+/* Общий контейнер для страницы квестов */
+.quests-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Сайдбар со структурой: фиксируем и даём скролл */
+.quests-sidebar {
+  position: sticky;
+  top: 4.5rem; /* чуть ниже навбара */
+  max-height: calc(100vh - 5rem);
+  overflow: hidden;
+}
+
+.quests-tree {
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Чтобы скроллбар не резал глаз */
+.quests-tree::-webkit-scrollbar {
+  width: 6px;
+}
+.quests-tree::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+/* Контент справа */
+.quests-content {
+  min-height: 60vh;
+}
+
+/* Markdown в правой части — читаемый */
+.quests-markdown {
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.quests-markdown h1,
+.quests-markdown h2,
+.quests-markdown h3 {
+  margin-top: 1.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.quests-markdown p {
+  margin-bottom: 0.5rem;
+}
+
+.quests-markdown ul,
+.quests-markdown ol {
+  padding-left: 1.4rem;
+}
+
+/* Поиск */
+.quests-search .form-control {
+  min-width: 260px;
+}
+
+/* Немного подчистим список в дереве (по желанию можно доработать quest_node.html) */
+.quests-tree li {
+  margin: 2px 0;
+  font-size: 0.9rem;
+}
