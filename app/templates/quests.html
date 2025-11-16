@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Quest Functions{% endblock %}
+{% block title %}Quest functions{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -20,13 +20,19 @@
           {% endfor %}
         </ul>
       {% else %}
-        <p class="text-muted">Репозиторий с квестами пока недоступен (проверь клонирование в /data).</p>
+        <p class="text-muted">Репозиторий с квестами пока недоступен.</p>
       {% endif %}
     </div>
   </div>
 
   <div class="col-md-8 mb-3">
     <div class="bg-black p-3 rounded" style="max-height: 80vh; overflow: auto;">
+      {% if current_path %}
+        <div class="small text-muted mb-2">
+          Путь: <code>{{ current_path }}</code>
+        </div>
+      {% endif %}
+
       {% if content_html %}
         <div class="small quest-content">
           {{ content_html | safe }}

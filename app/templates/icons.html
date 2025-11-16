@@ -36,8 +36,8 @@
         <div class="card bg-black border-secondary h-100">
           <div class="card-body p-2">
             <img src="{{ url_for('icons', path=icon.path) }}"
-                 alt="{{ icon.name }}"
-                 style="width:64px;height:64px;image-rendering: pixelated;">
+                alt="{{ icon.name }}"
+                class="icon-thumb">
           </div>
           <div class="card-footer p-1 small text-truncate">
             {{ icon.name }}

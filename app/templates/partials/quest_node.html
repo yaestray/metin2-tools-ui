@@ -1,23 +1,24 @@
-{% macro render_node(node) %}
+{% macro render_node(node, current_path=None) %}
   {% if node.type == 'dir' %}
     <li class="mb-1">
       <div class="fw-semibold">{{ node.name }}</div>
       {% if node.children %}
         <ul class="list-unstyled ms-3">
           {% for child in node.children %}
-            {{ render_node(child) }}
+            {{ render_node(child, current_path) }}
           {% endfor %}
         </ul>
       {% endif %}
     </li>
   {% elif node.type == 'file' %}
+    {% set is_active = (current_path == node.path) %}
     <li>
       <a href="{{ url_for('quests_view') }}?path={{ node.path }}"
-         class="link-light text-decoration-none d-block py-1">
+         class="d-block py-1 text-decoration-none small quest-link {% if is_active %}quest-link-active{% endif %}">
         {{ node.name }}
       </a>
     </li>
   {% endif %}
 {% endmacro %}
 
-{{ render_node(node) }}
+{{ render_node(node, current_path) }}
