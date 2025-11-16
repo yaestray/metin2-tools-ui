@@ -185,3 +185,56 @@ body {
 .quest-children.collapsed {
   display: none;
 }
+
+/* Обёртка страницы квестов */
+.quests-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Левая колонка со структурой: ограничиваем высоту и даём скролл */
+.quests-sidebar {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Скроллбар чуть более аккуратный */
+.quests-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.quests-sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+/* Ссылки в дереве */
+.quests-tree .quest-link {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: rgba(229, 229, 229, 0.95);
+  text-decoration: none;
+  padding: 1px 0;
+}
+
+.quests-tree .quest-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Контент квеста справа */
+.quests-markdown {
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.quests-markdown h1,
+.quests-markdown h2,
+.quests-markdown h3 {
+  margin-top: 1.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.quests-markdown p {
+  margin-bottom: 0.5rem;
+}

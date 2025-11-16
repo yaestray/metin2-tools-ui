@@ -1,28 +1,17 @@
-<li class="quest-node
-           {% if node.children %}has-children{% endif %}
-           {% if node.current %}is-active{% endif %}">
-  <div class="quest-node-line d-flex align-items-start">
-    {% if node.children %}
-      <button type="button"
-              class="quest-toggle btn btn-link btn-sm p-0 me-1"
-              aria-label="Toggle children">
-        <span class="quest-toggle-icon">▸</span>
-      </button>
-    {% else %}
-      <span class="quest-toggle-spacer me-1"></span>
-    {% endif %}
-
-    {# Ссылка на файл/раздел — подставь то поле, которое реально есть в node #}
-    <a href="/quests?path={{ node.path | urlencode }}"
-       class="quest-node-link {% if node.current %}active{% endif %}">
+<li>
+  <div class="d-flex align-items-start">
+    <a
+      href="/quests?path={{ node.path | urlencode }}"
+      class="quest-link"
+    >
       {{ node.name }}
     </a>
   </div>
 
   {% if node.children %}
-    <ul class="list-unstyled ms-3 quest-children collapsed">
-      {% for c in node.children %}
-        {% set node = c %}
+    <ul class="list-unstyled ms-3">
+      {% for child in node.children %}
+        {% set node = child %}
         {% include "partials/quest_node.html" %}
       {% endfor %}
     </ul>
