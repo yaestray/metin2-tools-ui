@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}
+<div class="row">
+<div class="col-4"><ul>
+{% for node in tree %}{% include "partials/quest_node.html" with context %}{% endfor %}
+</ul></div>
+<div class="col-8">{% if content_html %}{{ content_html|safe }}{% else %}<p>Select file</p>{% endif %}</div>
+</div>
+{% endblock %}

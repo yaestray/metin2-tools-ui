@@ -1,0 +1,5 @@
+{% if node.type=='dir' %}
+<li><b>{{ node.name }}</b><ul>{% for c in node.children %}{% include "partials/quest_node.html" with node=c %}{% endfor %}</ul></li>
+{% else %}
+<li><a href="{{ url_for('quests_view') }}?path={{ node.path }}">{{ node.name }}</a></li>
+{% endif %}
