@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import FileResponse
 
 from .services import quest_index, icons_index
 from .config import ICONS_REPO_PATH
@@ -10,7 +9,7 @@ from .config import ICONS_REPO_PATH
 app = FastAPI(title="Metin2 Tools UI")
 templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-app.mount("/icons", StaticFiles(directory=ICONS_REPO_PATH), name="icons")
+##app.mount("/icons", StaticFiles(directory=ICONS_REPO_PATH), name="icons")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -58,6 +57,23 @@ async def icons_page(
             "total": pagination["total"],
         },
     )
+
+@app.get("/icons/raw/{path:path}", name="icon_file")
+async def icon_file(path: str):
+    fp = ICONS_REPO_PATH / path
+    if not fp.is_file():
+        raise HTTPException(status_code=404, detail="Icon not found")
+
+    ext = fp.suffix.lower()
+    if ext == ".png":
+        media_type = "image/png"
+    elif ext == ".tga":
+        # браузер тгу не отображает, но скачивание ок
+        media_type = "application/octet-stream"
+    else:
+        media_type = "application/octet-stream"
+
+    return FileResponse(fp, media_type=media_type, filename=fp.name)
 
 @app.get("/icons/file")
 async def icon_file(path: str):
