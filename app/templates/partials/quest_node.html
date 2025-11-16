@@ -1,24 +1,31 @@
-{% macro render_node(node, current_path=None) %}
-  {% if node.type == 'dir' %}
-    <li class="mb-1">
-      <div class="fw-semibold">{{ node.name }}</div>
-      {% if node.children %}
-        <ul class="list-unstyled ms-3">
-          {% for child in node.children %}
-            {{ render_node(child, current_path) }}
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </li>
-  {% elif node.type == 'file' %}
-    {% set is_active = (current_path == node.path) %}
-    <li>
-      <a href="{{ url_for('quests_view') }}?path={{ node.path }}"
-         class="d-block py-1 text-decoration-none small quest-link {% if is_active %}quest-link-active{% endif %}">
-        {{ node.name }}
-      </a>
-    </li>
-  {% endif %}
-{% endmacro %}
+<li class="quest-node
+           {% if node.children %}has-children{% endif %}
+           {% if node.current %}is-active{% endif %}"
+    data-depth="{{ depth }}">
+  <div class="quest-node-line d-flex align-items-start">
+    {% if node.children %}
+      <button type="button"
+              class="quest-toggle btn btn-link btn-sm p-0 me-1"
+              aria-label="Toggle children">
+        <span class="quest-toggle-icon">▸</span>
+      </button>
+    {% else %}
+      <span class="quest-toggle-spacer me-1"></span>
+    {% endif %}
 
-{{ render_node(node, current_path) }}
+    {# Ссылка на файл/раздел — используй тот параметр, который у тебя есть #}
+    <a href="/quests?path={{ node.path | urlencode }}"
+       class="quest-node-link {% if node.current %}active{% endif %}">
+      {{ node.name }}
+    </a>
+  </div>
+
+  {% if node.children %}
+    <ul class="list-unstyled ms-3 quest-children
+               {% if depth >= 1 and not node.current %}collapsed{% endif %}">
+      {% for c in node.children %}
+        {% include "partials/quest_node.html" with node=c, depth=depth+1 %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>

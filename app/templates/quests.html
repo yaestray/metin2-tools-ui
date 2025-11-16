@@ -15,11 +15,11 @@
 
           <div class="quests-tree">
             <ul class="list-unstyled mb-0">
-              {% for node in tree %}
-                {% include "partials/quest_node.html" with context %}
-              {% endfor %}
+                {% for node in tree %}
+                {% include "partials/quest_node.html" with node=node, depth=0 %}
+                {% endfor %}
             </ul>
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -41,8 +41,8 @@
               {% endif %}
             </div>
 
-            <!-- Поиск -->
-            <form class="quests-search input-group input-group-sm" method="get" action="{{ url_for('quests_page') }}">
+            <!-- Поиск: отправляем GET на этот же /quests -->
+            <form class="quests-search input-group input-group-sm" method="get">
               <input type="text"
                      class="form-control"
                      name="q"
@@ -64,3 +64,30 @@
   </div>
 </div>
 {% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const tree = document.querySelector('.quests-tree');
+  if (!tree) return;
+
+  tree.addEventListener('click', function (e) {
+    const btn = e.target.closest('.quest-toggle');
+    if (!btn) return;
+
+    const node = btn.closest('.quest-node');
+    if (!node) return;
+
+    const children = node.querySelector(':scope > .quest-children');
+    if (!children) return;
+
+    const isCollapsed = children.classList.contains('collapsed');
+    if (isCollapsed) {
+      children.classList.remove('collapsed');
+      node.classList.add('open');
+    } else {
+      children.classList.add('collapsed');
+      node.classList.remove('open');
+    }
+  });
+});
+</script>

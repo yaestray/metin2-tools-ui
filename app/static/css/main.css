@@ -129,69 +129,59 @@ body {
   }
 }
 
-/* Общий контейнер для страницы квестов */
-.quests-page {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Сайдбар со структурой: фиксируем и даём скролл */
-.quests-sidebar {
-  position: sticky;
-  top: 4.5rem; /* чуть ниже навбара */
-  max-height: calc(100vh - 5rem);
-  overflow: hidden;
-}
-
-.quests-tree {
-  max-height: calc(100vh - 7rem);
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-/* Чтобы скроллбар не резал глаз */
-.quests-tree::-webkit-scrollbar {
-  width: 6px;
-}
-.quests-tree::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
-}
-
-/* Контент справа */
-.quests-content {
-  min-height: 60vh;
-}
-
-/* Markdown в правой части — читаемый */
-.quests-markdown {
-  line-height: 1.6;
-  font-size: 0.95rem;
-}
-
-.quests-markdown h1,
-.quests-markdown h2,
-.quests-markdown h3 {
-  margin-top: 1.4rem;
-  margin-bottom: 0.6rem;
-}
-
-.quests-markdown p {
-  margin-bottom: 0.5rem;
-}
-
-.quests-markdown ul,
-.quests-markdown ol {
-  padding-left: 1.4rem;
-}
-
-/* Поиск */
-.quests-search .form-control {
-  min-width: 260px;
-}
-
-/* Немного подчистим список в дереве (по желанию можно доработать quest_node.html) */
-.quests-tree li {
-  margin: 2px 0;
+/* Узлы дерева квестов */
+.quest-node {
   font-size: 0.9rem;
+  margin: 1px 0;
+}
+
+.quest-node-line {
+  line-height: 1.3;
+}
+
+.quest-node-link {
+  color: #e5e5e5;
+  text-decoration: none;
+}
+
+.quest-node-link:hover {
+  text-decoration: underline;
+}
+
+.quest-node-link.active,
+.quest-node.is-active > .quest-node-line > .quest-node-link {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Тогглеры для сворачивания */
+.quest-toggle {
+  color: #9fa3ad;
+}
+
+.quest-toggle:hover {
+  color: #ffffff;
+}
+
+.quest-toggle-icon {
+  display: inline-block;
+  transform: rotate(0deg);
+  transition: transform 0.12s ease-out;
+  font-size: 0.7rem;
+}
+
+/* Когда дети развернуты */
+.quest-node.open > .quest-node-line .quest-toggle-icon {
+  transform: rotate(90deg);
+}
+
+/* Плейсхолдер под стрелочку, чтобы текст выровнять */
+.quest-toggle-spacer {
+  display: inline-block;
+  width: 0.8rem;
+}
+
+/* Скрытые дети */
+.quest-children.collapsed {
+  display: none;
 }
