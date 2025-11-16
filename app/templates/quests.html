@@ -7,8 +7,8 @@
   <div class="row g-3">
     <!-- Левая колонка: поиск + дерево -->
     <div class="col-md-4 col-lg-3">
-      <!-- Поиск. ВАЖНО: action только через url_for, без http:// -->
-      <form class="mb-2" method="get" action="{{ url_for('quests_page') }}">
+      <!-- Поиск: отправляем на отдельную страницу /quests/search -->
+      <form class="mb-2" method="get" action="{{ url_for('quests_search') }}">
         <div class="input-group input-group-sm">
           <input
             type="text"
@@ -17,22 +17,15 @@
             placeholder="Поиск по квестам…"
             value="{{ q or '' }}"
           >
-          {% if current_path %}
-          <input type="hidden" name="path" value="{{ current_path }}">
-          {% endif %}
           <button class="btn btn-outline-light" type="submit">Найти</button>
         </div>
-        {% if q %}
-        <div class="form-text text-muted">
-          Результаты по запросу: <span class="text-light">{{ q }}</span>
-        </div>
-        {% endif %}
       </form>
 
       <div class="quests-sidebar border border-secondary rounded p-2">
         <ul class="list-unstyled quests-tree mb-0">
-          {# Рекурсивный вывод дерева, без include/with, чтобы не ломалось #}
+          {# Рекурсивный вывод дерева #}
           {% for node in tree recursive %}
+            {# current_path и q приходят из main.py #}
             {% set is_active = (current_path and node.path == current_path) %}
             {% set is_parent_of_active = (current_path and current_path.startswith(node.path)) %}
             {% set li_classes = "quest-node" %}
@@ -62,7 +55,7 @@
                   href="{{ url_for('quests_page') }}?path={{ node.path | urlencode }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
                   class="quest-node-link{% if is_active %} active{% endif %}"
                 >
-                  {{ node.title }}
+                  {{ node.title or node.name }}
                 </a>
               </div>
 
