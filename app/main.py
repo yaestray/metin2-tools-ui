@@ -31,7 +31,7 @@ async def quests_view(request: Request, path: str):
     return templates.TemplateResponse("quests.html",
         {"request": request, "tree": tree, "content_html": html, "current_path": path})
 
-@app.get("/icons", response_class=HTMLResponse)
+@app.get("/icons", response_class=HTMLResponse, name="icons_page")
 async def icons_page(
     request: Request,
     folder: str = "",
@@ -39,11 +39,31 @@ async def icons_page(
     page: int = Query(1, ge=1),
 ):
     all_icons = icons_index.list_icons()
+    manifest_folders = icons_index.get_manifest_folders()
+
+    # ищем выбранную папку в манифесте
+    selected_folder = None
+    folder_prefix = ""
+    if folder:
+        for f in manifest_folders:
+            if f["id"] == folder:
+                selected_folder = f
+                folder_prefix = f["prefix"]
+                break
+
+    def _match_folder(icon_folder: str) -> bool:
+        if not folder_prefix:
+            return True
+        # простое startswith — при необходимости потом усложним
+        return icon_folder.startswith(folder_prefix)
+
     filtered = [
-        i for i in all_icons
-        if (not folder or (i["folder"] and i["folder"].startswith(folder)))
+        i
+        for i in all_icons
+        if _match_folder(i["folder"])
         and (not q or q.lower() in i["name"].lower())
     ]
+
     pagination = icons_index.paginated_icons(filtered, page=page, page_size=60)
     return templates.TemplateResponse(
         "icons.html",
@@ -51,6 +71,8 @@ async def icons_page(
             "request": request,
             "icons": pagination["items"],
             "folder": folder,
+            "folders": manifest_folders,
+            "selected_folder": selected_folder,
             "q": q,
             "page": pagination["page"],
             "pages": pagination["pages"],

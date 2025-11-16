@@ -15,17 +15,29 @@
            placeholder="Название иконки..."
            value="{{ q or '' }}">
   </div>
+
   <div class="col-12">
-    <input type="text"
-           class="form-control"
-           name="folder"
-           placeholder="Папка (items, skills...)"
-           value="{{ folder or '' }}">
+    <select class="form-select" name="folder">
+      <option value="">Все папки</option>
+      {% for f in folders %}
+        <option value="{{ f.id }}"
+                {% if folder == f.id %}selected{% endif %}>
+          {{ f.title }}
+        </option>
+      {% endfor %}
+    </select>
   </div>
+
   <div class="col-12">
     <button class="btn btn-outline-light" type="submit">Фильтровать</button>
   </div>
 </form>
+
+{% if selected_folder %}
+  <p class="small text-muted mb-2">
+    Папка: <code>{{ selected_folder.prefix }}</code>
+  </p>
+{% endif %}
 
 {% if not icons %}
   <p class="text-muted">Ничего не найдено.</p>
