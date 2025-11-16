@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from collections import defaultdict
 from typing import List, Dict, Any, Optional
 import json
@@ -8,6 +8,7 @@ from ..config import ICONS_REPO_PATH
 
 def _human_title(name) -> str:
     if isinstance(name, dict):
+        # локализованные заголовки вида {"ru": "Книги", "en": "Books"}
         if "ru" in name and isinstance(name["ru"], str):
             return name["ru"]
         for v in name.values():
@@ -19,7 +20,52 @@ def _human_title(name) -> str:
     return str(name)
 
 
+def _extract_icon_names(obj: Any) -> List[str]:
+    """
+    Рекурсивно обходит объект группы manifest'а и вытаскивает
+    все строки, в которых встречаются *.png / *.tga.
+    Возвращает список имён иконок БЕЗ расширения.
+    """
+    names = set()
+
+    def visit(x: Any):
+        if isinstance(x, str):
+            for ext in (".png", ".tga"):
+                if ext in x:
+                    try:
+                        stem = PurePosixPath(x).stem
+                    except Exception:
+                        stem = x.rsplit(ext, 1)[0]
+                    if stem:
+                        names.add(stem)
+        elif isinstance(x, dict):
+            for v in x.values():
+                visit(v)
+        elif isinstance(x, list):
+            for v in x:
+                visit(v)
+
+    visit(obj)
+    return sorted(names)
+
+
 def _load_manifest() -> List[Dict[str, Any]]:
+    """
+    Читает manifest.json и превращает его в список групп вида:
+
+    [
+      {
+        "id": "books",
+        "title": "Книги",
+        "items": ["icon_book1", "icon_book2", ...]
+      },
+      ...
+    ]
+
+    Не делаем никаких предположений о структуре, кроме того,
+    что на верхнем уровне dict {id: group_obj}.
+    Внутри group_obj рекурсивно ищем строки с *.png / *.tga.
+    """
     manifest_path = ICONS_REPO_PATH / "manifest.json"
     if not manifest_path.is_file():
         return []
@@ -29,84 +75,32 @@ def _load_manifest() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-    groups = []
-
-    if isinstance(raw, dict):
-        if isinstance(raw.get("groups"), list):
-            groups = raw["groups"]
-        elif isinstance(raw.get("folders"), list):
-            groups = raw["folders"]
-        else:
-            tmp = []
-            for k, v in raw.items():
-                if isinstance(v, dict):
-                    g = dict(v)
-                    g.setdefault("id", k)
-                    tmp.append(g)
-            groups = tmp
-
-    elif isinstance(raw, list):
-        groups = raw
-
-    else:
+    if not isinstance(raw, dict):
+        # если когда-нибудь сделаешь другой формат — можно будет расширить
         return []
 
-    result = []
-    for g in groups:
-        if not isinstance(g, dict):
-            continue
+    groups: List[Dict[str, Any]] = []
 
-        gid = g.get("id") or g.get("key") or g.get("slug") or g.get("name")
-        if isinstance(gid, dict):
-            gid = next(iter(gid.values()), None)
-        if not gid:
+    for gid, g in raw.items():
+        if not isinstance(g, dict):
             continue
 
         title = _human_title(
             g.get("title") or g.get("label") or g.get("name") or gid
         )
 
-        prefix = (
-            g.get("prefix") or g.get("path") or g.get("folder")
-            or g.get("dir") or ""
-        )
-        if prefix is None:
-            prefix = ""
-        prefix = str(prefix)
+        items = _extract_icon_names(g)
 
-        raw_items = (
-            g.get("items") or g.get("icons") or g.get("list")
-            or g.get("names") or []
-        )
-        items = []
-        if isinstance(raw_items, list):
-            for it in raw_items:
-                if isinstance(it, dict):
-                    nm = it.get("name") or it.get("id") or it.get("icon")
-                    if nm:
-                        items.append(str(nm))
-                elif isinstance(it, str):
-                    items.append(it)
-
-        result.append(
+        groups.append(
             {
-                "id": str(gid),
-                "title": title,
-                "prefix": prefix,
-                "items": items,
+                "id": str(gid),     # то самое "books", "food", ...
+                "title": title,     # "Книги", "Еда" и т.п.
+                "items": items,     # список stem'ов иконок
             }
         )
 
-    seen = set()
-    uniq = []
-    for g in result:
-        if g["id"] in seen:
-            continue
-        seen.add(g["id"])
-        uniq.append(g)
-
-    uniq.sort(key=lambda x: x["title"].lower())
-    return uniq
+    groups.sort(key=lambda x: x["title"].lower())
+    return groups
 
 
 _manifest_folders_cache: Optional[List[Dict[str, Any]]] = None

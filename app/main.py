@@ -43,31 +43,26 @@ async def icons_page(
 
     selected_folder = None
     items_set = set()
-    folder_prefix = ""
 
     if folder:
         for f in manifest_folders:
             if f["id"] == folder:
                 selected_folder = f
-                folder_prefix = f.get("prefix") or ""
-                items_set = {str(x) for x in (f.get("items") or [])}
+                items_set = set(f.get("items") or [])
                 break
 
-    def match_folder(icon):
-        name = icon["name"]
-
+    def match_folder(icon: dict) -> bool:
+        # папка не выбрана — показываем всё
         if not folder:
             return True
 
-        # 1) если manifest перечисляет конкретные имена иконок
+        name = icon.get("name", "") or ""
+
+        # если manifest дал список имён — используем только его
         if items_set:
             return name in items_set
 
-        # 2) если есть префикс
-        if folder_prefix:
-            return name.startswith(folder_prefix)
-
-        # 3) fallback: id группы как кусок имени
+        # на всякий случай fallback: id как часть имени
         if name.startswith(folder + "_"):
             return True
         if ("_" + folder + "_") in name:
@@ -78,12 +73,12 @@ async def icons_page(
         return False
 
     filtered = [
-        i for i in all_icons
-        if match_folder(i)
-        and (not q or q.lower() in i["name"].lower())
+        i
+        for i in all_icons
+        if match_folder(i) and (not q or q.lower() in i["name"].lower())
     ]
 
-    pagination = icons_index.paginated_icons(filtered, page)
+    pagination = icons_index.paginated_icons(filtered, page, page_size=60)
 
     return templates.TemplateResponse(
         "icons.html",
