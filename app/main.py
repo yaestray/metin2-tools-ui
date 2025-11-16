@@ -41,27 +41,44 @@ async def icons_page(
     all_icons = icons_index.list_icons()
     manifest_folders = icons_index.get_manifest_folders()
 
-    # ищем выбранную папку в манифесте
+    # ищем выбранную "папку" в manifest.json
     selected_folder = None
     folder_prefix = ""
     if folder:
         for f in manifest_folders:
             if f["id"] == folder:
                 selected_folder = f
-                folder_prefix = f["prefix"]
+                folder_prefix = f.get("prefix") or ""
                 break
 
-    def _match_folder(icon_folder: str) -> bool:
-        if not folder_prefix:
+    def match_folder(icon: dict) -> bool:
+        # если фильтр не выбран — показываем все
+        if not folder:
             return True
-        # простое startswith — при необходимости потом усложним
-        return icon_folder.startswith(folder_prefix)
+
+        name = icon.get("name", "")
+        real_folder = icon.get("folder", "")
+
+        # 1) если в manifest есть prefix — пробуем по нему
+        if folder_prefix:
+            if name.startswith(folder_prefix) or real_folder.startswith(folder_prefix):
+                return True
+
+        # 2) fallback: считаем, что id (food, greatswords и т.п.) —
+        #    логический префикс имени иконки
+        if name.startswith(folder + "_"):
+            return True
+        if ("_" + folder + "_") in name:
+            return True
+        if name.endswith("_" + folder):
+            return True
+
+        return False
 
     filtered = [
         i
         for i in all_icons
-        if _match_folder(i["folder"])
-        and (not q or q.lower() in i["name"].lower())
+        if match_folder(i) and (not q or q.lower() in i["name"].lower())
     ]
 
     pagination = icons_index.paginated_icons(filtered, page=page, page_size=60)
