@@ -23,57 +23,54 @@
 
       <div class="quests-sidebar border border-secondary rounded p-2">
         <ul class="list-unstyled quests-tree mb-0">
-          {# Рекурсивный вывод дерева #}
-          {% for node in tree recursive %}
-            {% set node_path = node.path or '' %}
-            {% set is_file = node_path.endswith('.md') %}
-            {% set is_active = (current_path and node_path == current_path) %}
-            {% set is_parent_of_active = (current_path and node_path and current_path.startswith(node_path)) %}
-            {% set li_classes = "quest-node" %}
-            {% if is_active %}
-                {% set li_classes = li_classes + " is-active" %}
-            {% endif %}
-            {% if is_parent_of_active %}
+            {% for node in tree recursive %}
+                {% set node_path = node.path or '' %}
+                {% set is_file = node_path.endswith('.md') %}
+                {% set is_active = (current_path and node_path == current_path) %}
+                {% set is_parent_of_active = (current_path and node_path and current_path.startswith(node_path)) %}
+                {% set li_classes = "quest-node" %}
+                {% if is_active %}
+                {% set li_classes = li_classes + " is-active open" %}
+                {% elif is_parent_of_active %}
                 {% set li_classes = li_classes + " open" %}
-            {% endif %}
+                {% endif %}
 
-            <li class="{{ li_classes }}">
+                <li class="{{ li_classes }}">
                 <div class="quest-node-line d-flex align-items-center">
-                {% if node.children %}
+                    {% if node.children %}
                     <button
-                    type="button"
-                    class="btn btn-link btn-sm p-0 me-1 quest-toggle"
-                    data-node-path="{{ node_path }}"
-                    aria-label="Развернуть/свернуть"
+                        type="button"
+                        class="btn btn-link btn-sm p-0 me-1 quest-toggle"
+                        aria-label="Развернуть/свернуть"
                     >
-                    <span class="quest-toggle-icon">▶</span>
+                        <span class="quest-toggle-icon">▶</span>
                     </button>
-                {% else %}
+                    {% else %}
                     <span class="quest-toggle-spacer me-1"></span>
-                {% endif %}
+                    {% endif %}
 
-                {% if is_file %}
+                    {% if is_file %}
                     <a
-                    href="{{ url_for('quests_page') }}?path={{ node_path | urlencode }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
-                    class="quest-node-link{% if is_active %} active{% endif %}"
+                        href="{{ url_for('quests_page') }}?path={{ node_path | urlencode }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
+                        class="quest-node-link{% if is_active %} active{% endif %}"
                     >
-                    {{ node.title or node.name }}
+                        {{ node.title or node.name }}
                     </a>
-                {% else %}
+                    {% else %}
                     <span class="quest-node-link folder">
-                    {{ node.title or node.name }}
+                        {{ node.title or node.name }}
                     </span>
-                {% endif %}
+                    {% endif %}
                 </div>
 
                 {% if node.children %}
-                <ul class="list-unstyled quests-children{% if not is_parent_of_active %} collapsed{% endif %}">
+                    <ul class="list-unstyled quests-children{% if not is_parent_of_active and not is_active %} collapsed{% endif %}">
                     {{ loop(node.children) }}
-                </ul>
+                    </ul>
                 {% endif %}
-            </li>
+                </li>
             {% endfor %}
-        </ul>
+            </ul>
       </div>
     </div>
 
