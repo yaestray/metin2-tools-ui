@@ -238,3 +238,21 @@ body {
 .quests-markdown p {
   margin-bottom: 0.5rem;
 }
+
+/* Чуть притемнить фон правой карточки, чтобы текст лучше читался */
+.quests-markdown {
+  background-color: #050505;
+}
+
+/* Ссылки в дереве, если длинные — обрезать с многоточием */
+.quest-node-line {
+  max-width: 100%;
+}
+
+.quest-node-link {
+  display: inline-block;
+  max-width: calc(100% - 1.4rem); /* с учётом стрелки слева */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

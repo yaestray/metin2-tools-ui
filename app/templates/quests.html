@@ -3,61 +3,111 @@
 {% block title %}Quest functions · Metin2 Tools{% endblock %}
 
 {% block content %}
-<div class="quests-page py-3">
+<div class="quests-page mt-3">
   <div class="row g-3">
     <!-- Левая колонка: поиск + дерево -->
-    <div class="col-lg-3">
-      <div class="card bg-black border-secondary h-100">
-        <div class="card-body p-2">
-          <h6 class="text-uppercase small mb-2 text-muted">Quest / Lua functions</h6>
-
-          <form class="mb-2" method="get" action="/quests">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text">🔎</span>
-              <input
-                type="text"
-                name="q"
-                class="form-control"
-                placeholder="Поиск по названию и содержимому…"
-                value="{{ q or '' }}"
-              >
-            </div>
-          </form>
-
-          <div class="quests-sidebar mt-2">
-            {% if tree %}
-              <ul class="list-unstyled mb-0 quests-tree">
-                {% for node in tree %}
-                  {% set node = node %}
-                  {% include "partials/quest_node.html" %}
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p class="small text-muted mb-0">
-                Дерево квестов не загружено.
-              </p>
-            {% endif %}
-          </div>
+    <div class="col-md-4 col-lg-3">
+      <!-- Поиск. ВАЖНО: action только через url_for, без http:// -->
+      <form class="mb-2" method="get" action="{{ url_for('quests_page') }}">
+        <div class="input-group input-group-sm">
+          <input
+            type="text"
+            class="form-control"
+            name="q"
+            placeholder="Поиск по квестам…"
+            value="{{ q or '' }}"
+          >
+          {% if current_path %}
+          <input type="hidden" name="path" value="{{ current_path }}">
+          {% endif %}
+          <button class="btn btn-outline-light" type="submit">Найти</button>
         </div>
+        {% if q %}
+        <div class="form-text text-muted">
+          Результаты по запросу: <span class="text-light">{{ q }}</span>
+        </div>
+        {% endif %}
+      </form>
+
+      <div class="quests-sidebar border border-secondary rounded p-2">
+        <ul class="list-unstyled quests-tree mb-0">
+          {# Рекурсивный вывод дерева, без include/with, чтобы не ломалось #}
+          {% for node in tree recursive %}
+            {% set is_active = (current_path and node.path == current_path) %}
+            {% set is_parent_of_active = (current_path and current_path.startswith(node.path)) %}
+            {% set li_classes = "quest-node" %}
+            {% if is_active %}
+              {% set li_classes = li_classes + " is-active" %}
+            {% endif %}
+            {% if is_parent_of_active %}
+              {% set li_classes = li_classes + " open" %}
+            {% endif %}
+
+            <li class="{{ li_classes }}">
+              <div class="quest-node-line d-flex align-items-center">
+                {% if node.children %}
+                  <button
+                    type="button"
+                    class="btn btn-link btn-sm p-0 me-1 quest-toggle"
+                    data-node-path="{{ node.path }}"
+                    aria-label="Развернуть/свернуть"
+                  >
+                    <span class="quest-toggle-icon">▶</span>
+                  </button>
+                {% else %}
+                  <span class="quest-toggle-spacer me-1"></span>
+                {% endif %}
+
+                <a
+                  href="{{ url_for('quests_page') }}?path={{ node.path | urlencode }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
+                  class="quest-node-link{% if is_active %} active{% endif %}"
+                >
+                  {{ node.title }}
+                </a>
+              </div>
+
+              {% if node.children %}
+                <ul class="list-unstyled quests-children{% if not is_parent_of_active %} collapsed{% endif %}">
+                  {{ loop(node.children) }}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
 
-    <!-- Правая колонка: контент -->
-    <div class="col-lg-9">
+    <!-- Правая колонка: контент квеста -->
+    <div class="col-md-8 col-lg-9">
       <div class="card bg-black border-secondary h-100">
-        <div class="card-body">
-          {% if q %}
-            <div class="small text-muted mb-2">
-              Результаты поиска по запросу: <code>{{ q }}</code>
-            </div>
+        <div class="card-body quests-markdown quest-content">
+          {% if html %}
+            {{ html | safe }}
+          {% else %}
+            <p class="text-muted">
+              Выбери раздел слева, чтобы увидеть содержимое документации.
+            </p>
           {% endif %}
-
-          <div class="markdown-body quests-markdown">
-            {{ html|safe }}
-          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+{# Небольшой JS для сворачивания/разворачивания дерева #}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.quest-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const li = btn.closest('.quest-node');
+        const children = li.querySelector(':scope > .quests-children');
+        if (!children) return;
+
+        const isCollapsed = children.classList.toggle('collapsed');
+        li.classList.toggle('open', !isCollapsed);
+      });
+    });
+  });
+</script>
 {% endblock %}

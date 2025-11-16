@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request, HTTPException, Query
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from typing import Optional
 
 from .services import quest_index, icons_index
 from .config import ICONS_REPO_PATH
@@ -15,21 +16,34 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/quests", response_class=HTMLResponse)
-async def quests_page(request: Request):
+@app.get("/quests", response_class=HTMLResponse, name="quests_page")
+async def quests_page(
+    request: Request,
+    path: Optional[str] = Query(default=None, description="Path to markdown file"),
+    q: str = Query(default="", description="Search query"),
+):
     tree = quest_index.build_tree()
-    return templates.TemplateResponse("quests.html",
-        {"request": request, "tree": tree, "content_html": None, "current_path": None})
 
-@app.get("/quests/view", response_class=HTMLResponse)
-async def quests_view(request: Request, path: str):
-    tree = quest_index.build_tree()
-    try:
-        html = quest_index.get_markdown(path)
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found")
-    return templates.TemplateResponse("quests.html",
-        {"request": request, "tree": tree, "content_html": html, "current_path": path})
+    html = None
+    current_path = None
+
+    if path:
+        try:
+            html = quest_index.get_markdown(path)
+            current_path = path
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="File not found")
+
+    return templates.TemplateResponse(
+        "quests.html",
+        {
+            "request": request,
+            "tree": tree,
+            "html": html,              # <-- ВАЖНО: ключ теперь html
+            "current_path": current_path,
+            "q": q,
+        },
+    )
 
 @app.get("/icons", response_class=HTMLResponse, name="icons_page")
 async def icons_page(
