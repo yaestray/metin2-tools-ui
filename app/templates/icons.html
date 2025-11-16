@@ -18,13 +18,12 @@
 
   <div class="col-12">
     <select class="form-select" name="folder">
-      <option value="">Все папки</option>
-      {% for f in folders %}
-        <option value="{{ f.id }}"
-                {% if folder == f.id %}selected{% endif %}>
-          {{ f.title }}
-        </option>
-      {% endfor %}
+        <option value="">Все папки</option>
+        {% for f in folders %}
+            <option value="{{ f.id }}" {% if folder == f.id %}selected{% endif %}>
+            {{ f.title }}
+            </option>
+        {% endfor %}
     </select>
   </div>
 

@@ -52,25 +52,17 @@ async def icons_page(
                 break
 
     def match_folder(icon: dict) -> bool:
-        # папка не выбрана — показываем всё
+        # Папка не выбрана — показываем всё
         if not folder:
             return True
 
+        # Если для этой группы нет items — ничего не показываем (странный случай)
+        if not items_set:
+            return False
+
         name = icon.get("name", "") or ""
-
-        # если manifest дал список имён — используем только его
-        if items_set:
-            return name in items_set
-
-        # на всякий случай fallback: id как часть имени
-        if name.startswith(folder + "_"):
-            return True
-        if ("_" + folder + "_") in name:
-            return True
-        if name.endswith("_" + folder):
-            return True
-
-        return False
+        # Имя иконки — это как раз "27620"
+        return name in items_set
 
     filtered = [
         i

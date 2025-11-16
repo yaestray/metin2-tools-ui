@@ -1,14 +1,14 @@
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from collections import defaultdict
 from typing import List, Dict, Any, Optional
 import json
 
 from ..config import ICONS_REPO_PATH
 
-
 def _human_title(name) -> str:
+    """Берём человекочитаемое название группы."""
     if isinstance(name, dict):
-        # локализованные заголовки вида {"ru": "Книги", "en": "Books"}
+        # локализованный вариант {"ru": "Книги", ...}
         if "ru" in name and isinstance(name["ru"], str):
             return name["ru"]
         for v in name.values():
@@ -20,51 +20,31 @@ def _human_title(name) -> str:
     return str(name)
 
 
-def _extract_icon_names(obj: Any) -> List[str]:
-    """
-    Рекурсивно обходит объект группы manifest'а и вытаскивает
-    все строки, в которых встречаются *.png / *.tga.
-    Возвращает список имён иконок БЕЗ расширения.
-    """
-    names = set()
-
-    def visit(x: Any):
-        if isinstance(x, str):
-            for ext in (".png", ".tga"):
-                if ext in x:
-                    try:
-                        stem = PurePosixPath(x).stem
-                    except Exception:
-                        stem = x.rsplit(ext, 1)[0]
-                    if stem:
-                        names.add(stem)
-        elif isinstance(x, dict):
-            for v in x.values():
-                visit(v)
-        elif isinstance(x, list):
-            for v in x:
-                visit(v)
-
-    visit(obj)
-    return sorted(names)
-
-
 def _load_manifest() -> List[Dict[str, Any]]:
     """
-    Читает manifest.json и превращает его в список групп вида:
+    Ожидаемый формат:
+
+    {
+      "books": {
+        "name": {"ru": "Книги"},
+        "icons": {
+          "27620": {...},
+          "30008": {...}
+        }
+      },
+      "food": { ... }
+    }
+
+    Превращаем в:
 
     [
       {
         "id": "books",
         "title": "Книги",
-        "items": ["icon_book1", "icon_book2", ...]
+        "items": ["27620", "30008", ...]
       },
       ...
     ]
-
-    Не делаем никаких предположений о структуре, кроме того,
-    что на верхнем уровне dict {id: group_obj}.
-    Внутри group_obj рекурсивно ищем строки с *.png / *.tga.
     """
     manifest_path = ICONS_REPO_PATH / "manifest.json"
     if not manifest_path.is_file():
@@ -76,7 +56,6 @@ def _load_manifest() -> List[Dict[str, Any]]:
         return []
 
     if not isinstance(raw, dict):
-        # если когда-нибудь сделаешь другой формат — можно будет расширить
         return []
 
     groups: List[Dict[str, Any]] = []
@@ -85,17 +64,20 @@ def _load_manifest() -> List[Dict[str, Any]]:
         if not isinstance(g, dict):
             continue
 
-        title = _human_title(
-            g.get("title") or g.get("label") or g.get("name") or gid
-        )
+        title = _human_title(g.get("name") or g.get("title") or gid)
 
-        items = _extract_icon_names(g)
+        icons_obj = g.get("icons") or {}
+        if not isinstance(icons_obj, dict):
+            icons_obj = {}
+
+        # Ключи icons — это ID, они же имя файла без расширения
+        items = sorted(str(icon_id) for icon_id in icons_obj.keys())
 
         groups.append(
             {
-                "id": str(gid),     # то самое "books", "food", ...
-                "title": title,     # "Книги", "Еда" и т.п.
-                "items": items,     # список stem'ов иконок
+                "id": str(gid),     # "books"
+                "title": title,     # "Книги"
+                "items": items,     # ["27620", "30008", ...]
             }
         )
 
@@ -111,7 +93,6 @@ def get_manifest_folders() -> List[Dict[str, Any]]:
     if _manifest_folders_cache is None:
         _manifest_folders_cache = _load_manifest()
     return _manifest_folders_cache
-
 
 def list_icons():
     if not ICONS_REPO_PATH.exists():
