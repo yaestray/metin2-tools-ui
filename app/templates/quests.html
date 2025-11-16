@@ -25,47 +25,54 @@
         <ul class="list-unstyled quests-tree mb-0">
           {# Рекурсивный вывод дерева #}
           {% for node in tree recursive %}
-            {# current_path и q приходят из main.py #}
-            {% set is_active = (current_path and node.path == current_path) %}
-            {% set is_parent_of_active = (current_path and current_path.startswith(node.path)) %}
+            {% set node_path = node.path or '' %}
+            {% set is_file = node_path.endswith('.md') %}
+            {% set is_active = (current_path and node_path == current_path) %}
+            {% set is_parent_of_active = (current_path and node_path and current_path.startswith(node_path)) %}
             {% set li_classes = "quest-node" %}
             {% if is_active %}
-              {% set li_classes = li_classes + " is-active" %}
+                {% set li_classes = li_classes + " is-active" %}
             {% endif %}
             {% if is_parent_of_active %}
-              {% set li_classes = li_classes + " open" %}
+                {% set li_classes = li_classes + " open" %}
             {% endif %}
 
             <li class="{{ li_classes }}">
-              <div class="quest-node-line d-flex align-items-center">
+                <div class="quest-node-line d-flex align-items-center">
                 {% if node.children %}
-                  <button
+                    <button
                     type="button"
                     class="btn btn-link btn-sm p-0 me-1 quest-toggle"
-                    data-node-path="{{ node.path }}"
+                    data-node-path="{{ node_path }}"
                     aria-label="Развернуть/свернуть"
-                  >
+                    >
                     <span class="quest-toggle-icon">▶</span>
-                  </button>
+                    </button>
                 {% else %}
-                  <span class="quest-toggle-spacer me-1"></span>
+                    <span class="quest-toggle-spacer me-1"></span>
                 {% endif %}
 
-                <a
-                  href="{{ url_for('quests_page') }}?path={{ node.path | urlencode }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
-                  class="quest-node-link{% if is_active %} active{% endif %}"
-                >
-                  {{ node.title or node.name }}
-                </a>
-              </div>
+                {% if is_file %}
+                    <a
+                    href="{{ url_for('quests_page') }}?path={{ node_path | urlencode }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
+                    class="quest-node-link{% if is_active %} active{% endif %}"
+                    >
+                    {{ node.title or node.name }}
+                    </a>
+                {% else %}
+                    <span class="quest-node-link folder">
+                    {{ node.title or node.name }}
+                    </span>
+                {% endif %}
+                </div>
 
-              {% if node.children %}
+                {% if node.children %}
                 <ul class="list-unstyled quests-children{% if not is_parent_of_active %} collapsed{% endif %}">
-                  {{ loop(node.children) }}
+                    {{ loop(node.children) }}
                 </ul>
-              {% endif %}
+                {% endif %}
             </li>
-          {% endfor %}
+            {% endfor %}
         </ul>
       </div>
     </div>

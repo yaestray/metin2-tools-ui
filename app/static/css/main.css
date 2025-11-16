@@ -195,7 +195,7 @@ body {
 /* Левая колонка со структурой: ограничиваем высоту и даём скролл */
 .quests-sidebar {
   height: calc(100vh - 140px); /* фиксированная высота под окно */
-  overflow-y: auto;
+  overflow-y: scroll;
   padding-right: 4px;
 }
 
@@ -246,4 +246,19 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Левая колонка на странице квестов — растягиваем и даём скролл только блоку с деревом */
+.quests-page .col-md-4,
+.quests-page .col-lg-3 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Сам блок с деревом — занимает всё доступное место и скроллится */
+.quests-sidebar {
+  flex: 1 1 auto;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  padding-right: 4px;
 }
